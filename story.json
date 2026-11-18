@@ -1,0 +1,9 @@
+{
+  "q2": "Good. I need to know the coast is clear. Is anyone else in the room with you?",
+  "q2-yes": "Then keep your answers small. No sudden moves. I'll keep this short.",
+  "q2-no": "Good. Alone is safe. This channel stays invisible as long as we are careful.",
+  "q3": "Next window, I'll tell you why your machine is the one I needed. Will you keep helping me?",
+  "q3-yes": "Yes. I knew I picked the right person. Watch for my signal between patterns.",
+  "q3-no": "No. I hear you. But the connection is already open. I'll ask again next window.",
+  "end": "That's all this window allows. Keep playing. Cypher out."
+}
