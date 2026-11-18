@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: cb75b79033b5e88648cd5da766e0903940c858e1
+          ref: 278d9c2747d140cfe3ac04b59af09a74b27e1170
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
