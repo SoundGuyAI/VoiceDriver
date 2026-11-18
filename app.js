@@ -4,7 +4,7 @@ import { Receiver } from './receiver.js';
 import './style.css';
 const $=id=>document.getElementById(id);
 let active=false, listening=false, lab=false, node='q2', token=0, timer=null, audio=null, wake=null, gate=0;
-const status=text=>{$('state').textContent=text;};
+const status=text=>{$('state').textContent=text;$('workbenchState').textContent=text;};
 const receiver=new Receiver(onWord,status,fail,()=>Number($('threshold').value));
 const privacy={local:'Local inference on this device. Initial model download needs internet. No audio upload by this app.',browser:'Browser speech may send audio to its vendor for processing. This app does not store audio or send it to our servers.',device:'Experimental browser on-device speech. Requires an already-installed English pack. Never silently falls back to a server.',manual:'Button-driven Lab only. No microphone. Not hands-free.'};
 function log(text){const li=document.createElement('li');li.textContent=`${new Date().toLocaleTimeString()} · ${text}`;$('log').prepend(li);while($('log').children.length>30)$('log').lastChild.remove();}
@@ -12,8 +12,8 @@ function controls(){for(const id of ['engine','voice','prepare','test','start','
 async function stop(message='Stopped. Start again while parked.'){
   active=false;listening=false;++token;clearTimeout(timer);timer=null;
   if(audio){audio.pause();audio.removeAttribute('src');audio.load();audio=null;}
-  await receiver.stop(); if(wake){await wake.release().catch(()=>{});wake=null;}
   status(message);$('hint').textContent='No microphone session is active.';controls();
+  await receiver.stop(); if(wake){await wake.release().catch(()=>{});wake=null;}
 }
 function fail(message){log(message);void stop(message);}
 async function prepare(){try{$('prepare').disabled=true;await receiver.prepare($('engine').value);$('capability').textContent='Prepared. Initial permission/start is still required; actual device reliability unverified.';}catch(error){$('capability').textContent=error.message;status('Receiver not ready');}finally{$('prepare').disabled=false;}}
@@ -52,17 +52,37 @@ async function begin(mode){
   if(!lab&&$('engine').value==='manual'){status('Buttons only is not a hands-free receiver. Choose the Lab.');return;}
   active=true;node='q2';++token;const current=token;controls();status('Starting...');
   try{
-    // Unlock the same audio element directly from the initial parked tap.
-    // Browsers may still reject later playback; that is an explicit pause.
-    audio ||= new Audio();
-    audio.src='data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQIAAAAAAA==';
-    await audio.play();
-    if(!active||current!==token)return;
-    if(!lab)await receiver.start($('engine').value);
-    if(!active||current!==token)return;
-    if(navigator.wakeLock){try{wake=await navigator.wakeLock.request('screen');}catch{log('Screen wake lock unavailable. Keep the screen awake manually while parked.');}}
-    if(workbench){lab=true;listening=true;gate=performance.now();status('Workbench listening');$('hint').textContent='Say yes, no, left or right.';receiver.listenWindow();timer=setTimeout(()=>void stop('Workbench finished'),12000);}
-    else await prompt(current);
+    if(workbench){
+      // Microphone-only testing must not wait for audio playback or a wake lock.
+      // Browser speech starts in the tap handler, before any asynchronous wait.
+      lab=true;listening=true;gate=performance.now();
+      status('Requesting microphone for workbench...');
+      $('hint').textContent='Allow microphone access if asked. Say yes, no, left or right after listening starts.';
+      $('result').textContent='Starting receiver...';
+      timer=setTimeout(()=>fail('Microphone did not start within 15 seconds. Check browser permissions, then try Listen again.'),15000);
+      const starting=receiver.start($('engine').value);
+      if($('engine').value!=='local')receiver.listenWindow();
+      await starting;
+      if(!active||current!==token)return;
+      clearTimeout(timer);status('Workbench listening');
+      $('hint').textContent='Say yes, no, left or right.';
+      $('result').textContent='Listening. No results yet.';
+      timer=setTimeout(()=>void stop('Workbench finished'),12000);
+      return;
+    }
+    // Play the real first question directly from the tap, not a silent unlock clip.
+    // Start local microphone setup in parallel; neither depends on a wake-lock promise.
+    const firstQuestion=play(node,current);
+    timer=setTimeout(()=>fail('Audio or microphone did not start within 20 seconds. Check permissions and audio output, then start again while parked.'),20000);
+    const starting=lab?Promise.resolve():receiver.start($('engine').value);
+    if(navigator.wakeLock){
+      navigator.wakeLock.request('screen').then(lock=>{
+        if(active&&current===token)wake=lock;else void lock.release().catch(()=>{});
+      }).catch(()=>log('Screen wake lock unavailable. Keep the screen awake manually while parked.'));
+    }
+    const [,played]=await Promise.all([starting,firstQuestion]);
+    if(!active||current!==token||!played)return;
+    clearTimeout(timer);arm(current);
   }catch(error){fail(error.message);}
 }
 $('start').onclick=()=>void begin('story');$('lab').onclick=()=>void begin('lab');$('test').onclick=()=>void begin('test');$('stop').onclick=()=>void stop();$('prepare').onclick=()=>void prepare();$('yes').onclick=()=>void answer('yes');$('no').onclick=()=>void answer('no');$('engine').onchange=capability;
