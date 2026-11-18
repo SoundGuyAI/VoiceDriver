@@ -1,0 +1,1 @@
+{"name":"voicedriver","version":"0.1.0","private":true,"type":"module","scripts":{"dev":"vite --host 0.0.0.0","build":"vite build --base=./","test":"node --test tests/*.test.js","test:e2e":"playwright test"},"dependencies":{"@tensorflow-models/speech-commands":"0.5.4","@tensorflow/tfjs":"4.22.0"},"devDependencies":{"@playwright/test":"^1.65.1","vite":"^8.3.8"}}
