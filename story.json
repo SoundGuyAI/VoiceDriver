@@ -1,4 +1,6 @@
 {
+  "intro": "Connection check. This channel stays hidden as long as we're careful. Keep your answers short. Say yes or no. First question. Can you hear me?",
+  "retry": "No? Then the channel is still weak. Let me boost the signal. Try again. Can you hear me now?",
   "q2": "Good. I need to know the coast is clear. Is anyone else in the room with you?",
   "q2-yes": "Then keep your answers small. No sudden moves. I'll keep this short.",
   "q2-no": "Good. Alone is safe. This channel stays invisible as long as we are careful.",

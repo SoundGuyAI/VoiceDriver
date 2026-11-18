@@ -10,6 +10,7 @@ export function classify(labels, scores, threshold = .8) {
 }
 export function transition(node, answer) {
   if (!['yes', 'no'].includes(answer)) return null;
+  if (node === 'intro' || node === 'retry') return { response: null, next: answer === 'yes' ? 'q2' : 'retry' };
   if (node === 'q2') return { response: `q2-${answer}`, next: 'q3' };
   if (node === 'q3') return { response: `q3-${answer}`, next: 'end' };
   return null;

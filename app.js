@@ -3,7 +3,7 @@ import { transition } from './logic.js';
 import { Receiver } from './receiver.js';
 import './style.css';
 const $=id=>document.getElementById(id);
-let active=false, listening=false, lab=false, node='q2', token=0, timer=null, audio=null, wake=null, gate=0;
+let active=false, listening=false, lab=false, node='intro', token=0, timer=null, audio=null, wake=null, gate=0;
 const status=text=>{$('state').textContent=text;$('workbenchState').textContent=text;};
 const receiver=new Receiver(onWord,status,fail,()=>Number($('threshold').value));
 const privacy={local:'Local inference on this device. Initial model download needs internet. No audio upload by this app.',browser:'Browser speech may send audio to its vendor for processing. This app does not store audio or send it to our servers.',device:'Experimental browser on-device speech. Requires an already-installed English pack. Never silently falls back to a server.',manual:'Button-driven Lab only. No microphone. Not hands-free.'};
@@ -38,7 +38,7 @@ async function answer(word){
   if(!active||!listening||performance.now()<gate)return;
   const next=transition(node,word);if(!next){log(`Ignored ${word}: this story accepts yes/no only.`);return;}
   listening=false;receiver.closeWindow();clearTimeout(timer);const current=token;log(`Story ${node}: ${word}`);
-  try{if(!await play(next.response,current))return;node=next.next;await prompt(current);}catch(error){fail(error.message);}
+  try{if(next.response&&!await play(next.response,current))return;node=next.next;await prompt(current);}catch(error){fail(error.message);}
 }
 function onWord(word,data){
   if(!active||!listening||performance.now()<gate)return;
@@ -50,7 +50,7 @@ async function begin(mode){
   if(mode!=='lab' && receiver.prepared!==$('engine').value){status('Prepare the selected receiver in parked setup first.');$('prepare').scrollIntoView({block:'center'});$('prepare').focus();return;}
   lab=mode==='lab'; const workbench=mode==='test';
   if(!lab&&$('engine').value==='manual'){status('Buttons only is not a hands-free receiver. Choose the Lab.');return;}
-  active=true;node='q2';++token;const current=token;controls();status('Starting...');
+  active=true;node='intro';++token;const current=token;controls();status('Starting...');
   try{
     if(workbench){
       // Microphone-only testing must not wait for audio playback or a wake lock.

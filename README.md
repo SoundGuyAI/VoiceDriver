@@ -41,9 +41,11 @@ Scores are model/service outputs, not measured accuracy or calibrated confidence
 
 ## Cypher demo provenance
 
-The demo reuses the existing Wall Tones Lab q2, q2-yes, q2-no, q3, q3-yes, q3-no and end recordings in both voice sets, byte-for-byte. Captions are copied from the corresponding source script, not newly written dialogue. Source: `SoundGuyAI/IWSDKMetaOct2026Pub` commit `948f9a5475d2dcfd383368c88677b5194584bef0`, `src/nod-lab/lab-script.ts` and `public/audio/speech/cypher-lab/`.
+The demo reuses the existing Wall Tones Lab q2, q2-yes, q2-no, q3, q3-yes, q3-no and end recordings in both voice sets, byte-for-byte. Captions for these unchanged clips are copied from the corresponding source script. Source: `SoundGuyAI/IWSDKMetaOct2026Pub` commit `948f9a5475d2dcfd383368c88677b5194584bef0`, `src/nod-lab/lab-script.ts` and `public/audio/speech/cypher-lab/`.
 
-This is a short excerpt, not a full-length drama. It intentionally omits gesture-specific intro/retry instructions. Existing game references remain in the recordings. Cypher's fictional channel remains one-way; voice recognition drives the prototype UI, not a rewrite of story canon. Left/right are workbench commands only because the reused story has no corresponding branches. No substitute voice or invented Cypher line is used.
+The opening restores a voice-adapted connection check and retry in Kore (female) and Algenib (male). Both start with intro, then an automatic yes/no window. Yes advances to q2 once. No plays retry and opens another answer window. Repeated no repeats retry; silence pauses without choosing an answer. The later scene recordings remain unchanged. Left/right are workbench commands only. This is a short scene, not a full-length drama.
+
+New opening clips use a 300-3300 Hz voice band, compression, 12-bit radio texture and a seeded pink-noise bed, mixed to 24 kHz mono and encoded once at 80 kbps MP3. Final encoded clips measure -18.7 to -18.9 LUFS with true peaks below -1.5 dBTP. Transcript alignment verifies the complete spoken lines and split boundaries. Subjective voice/sound matching and physical-device playback remain unverified.
 
 ## Verification and caveats
 
